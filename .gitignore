@@ -1,0 +1,16 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# Local runtime/export outputs
+*.tmp
+*.log
+exports/
+export/
+*.pck
+*.exe
+*.zip
+
+# Local agent/tooling metadata, not part of the Godot submission
+.agents/
+skills-lock.json

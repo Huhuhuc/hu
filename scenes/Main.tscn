@@ -1,0 +1,254 @@
+[gd_scene load_steps=3 format=3 uid="uid://c3vdob5nbpr7y"]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="Script" path="res://scripts/ui/curve_graph.gd" id="2_curve"]
+
+[node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_main")
+
+[node name="RootScroll" type="ScrollContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+horizontal_scroll_mode = 0
+
+[node name="RootMargin" type="MarginContainer" parent="RootScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="VBox" type="VBoxContainer" parent="RootScroll/RootMargin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="RootScroll/RootMargin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "流派强弱模拟验证器"
+
+[node name="Controls" type="HBoxContainer" parent="RootScroll/RootMargin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="StrategyOption" type="OptionButton" parent="RootScroll/RootMargin/VBox/Controls"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(180, 0)
+
+[node name="ModeOption" type="OptionButton" parent="RootScroll/RootMargin/VBox/Controls"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(140, 0)
+
+[node name="RunButton" type="Button" parent="RootScroll/RootMargin/VBox/Controls"]
+layout_mode = 2
+text = "运行单场"
+
+[node name="BatchRunsSpin" type="SpinBox" parent="RootScroll/RootMargin/VBox/Controls"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 1.0
+max_value = 200.0
+value = 30.0
+rounded = true
+prefix = "N="
+
+[node name="BatchButton" type="Button" parent="RootScroll/RootMargin/VBox/Controls"]
+layout_mode = 2
+text = "批量模拟"
+
+[node name="CompareButton" type="Button" parent="RootScroll/RootMargin/VBox/Controls"]
+layout_mode = 2
+text = "对照三流派"
+
+[node name="ExportButton" type="Button" parent="RootScroll/RootMargin/VBox/Controls"]
+layout_mode = 2
+text = "导出 JSON/CSV"
+
+[node name="ReplayButton" type="Button" parent="RootScroll/RootMargin/VBox/Controls"]
+layout_mode = 2
+text = "回放上次结果"
+
+[node name="ReloadButton" type="Button" parent="RootScroll/RootMargin/VBox/Controls"]
+layout_mode = 2
+text = "重新加载配置"
+
+[node name="BackMenuButton" type="Button" parent="RootScroll/RootMargin/VBox/Controls"]
+layout_mode = 2
+text = "返回菜单"
+
+[node name="StatusLabel" type="Label" parent="RootScroll/RootMargin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "等待加载配置..."
+
+[node name="StagePreviewLabel" type="Label" parent="RootScroll/RootMargin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "场景预览"
+autowrap_mode = 3
+
+[node name="ArenaPanel" type="PanelContainer" parent="RootScroll/RootMargin/VBox"]
+layout_mode = 2
+
+[node name="ArenaMargin" type="MarginContainer" parent="RootScroll/RootMargin/VBox/ArenaPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="ArenaBox" type="HBoxContainer" parent="RootScroll/RootMargin/VBox/ArenaPanel/ArenaMargin"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="PlayerVisualBox" type="VBoxContainer" parent="RootScroll/RootMargin/VBox/ArenaPanel/ArenaMargin/ArenaBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(110, 76)
+
+[node name="PlayerColor" type="ColorRect" parent="RootScroll/RootMargin/VBox/ArenaPanel/ArenaMargin/ArenaBox/PlayerVisualBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(70, 36)
+color = Color(0.95, 0.48, 0.16, 1)
+
+[node name="PlayerVisualLabel" type="Label" parent="RootScroll/RootMargin/VBox/ArenaPanel/ArenaMargin/ArenaBox/PlayerVisualBox"]
+layout_mode = 2
+text = "玩家\n余烬猎手"
+horizontal_alignment = 1
+
+[node name="EnemyPreviewContainer" type="HBoxContainer" parent="RootScroll/RootMargin/VBox/ArenaPanel/ArenaMargin/ArenaBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="DamageHintLabel" type="Label" parent="RootScroll/RootMargin/VBox/ArenaPanel/ArenaMargin/ArenaBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(260, 0)
+text = "伤害提示：等待战斗开始"
+autowrap_mode = 3
+
+[node name="BattlePanel" type="HBoxContainer" parent="RootScroll/RootMargin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="PlayerBox" type="VBoxContainer" parent="RootScroll/RootMargin/VBox/BattlePanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PlayerLabel" type="Label" parent="RootScroll/RootMargin/VBox/BattlePanel/PlayerBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "玩家 HP"
+
+[node name="PlayerHpBar" type="ProgressBar" parent="RootScroll/RootMargin/VBox/BattlePanel/PlayerBox"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 120.0
+value = 120.0
+show_percentage = false
+
+[node name="EnemyBox" type="VBoxContainer" parent="RootScroll/RootMargin/VBox/BattlePanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="EnemyLabel" type="Label" parent="RootScroll/RootMargin/VBox/BattlePanel/EnemyBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "敌人 HP"
+
+[node name="EnemyHpBar" type="ProgressBar" parent="RootScroll/RootMargin/VBox/BattlePanel/EnemyBox"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 100.0
+value = 100.0
+show_percentage = false
+
+[node name="MainSplit" type="HSplitContainer" parent="RootScroll/RootMargin/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 360)
+size_flags_vertical = 3
+split_offset = 370
+
+[node name="LeftBox" type="VBoxContainer" parent="RootScroll/RootMargin/VBox/MainSplit"]
+layout_mode = 2
+
+[node name="ResultTitle" type="Label" parent="RootScroll/RootMargin/VBox/MainSplit/LeftBox"]
+layout_mode = 2
+text = "结果"
+
+[node name="ResultLabel" type="Label" parent="RootScroll/RootMargin/VBox/MainSplit/LeftBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 190)
+text = "尚未运行"
+autowrap_mode = 3
+
+[node name="CompareChartPanel" type="PanelContainer" parent="RootScroll/RootMargin/VBox/MainSplit/LeftBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="CompareChartMargin" type="MarginContainer" parent="RootScroll/RootMargin/VBox/MainSplit/LeftBox/CompareChartPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="CompareChartBox" type="VBoxContainer" parent="RootScroll/RootMargin/VBox/MainSplit/LeftBox/CompareChartPanel/CompareChartMargin"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="CurveTitle" type="Label" parent="RootScroll/RootMargin/VBox/MainSplit/LeftBox"]
+layout_mode = 2
+text = "伤害曲线"
+
+[node name="CurveGraph" type="Control" parent="RootScroll/RootMargin/VBox/MainSplit/LeftBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 180)
+layout_mode = 2
+script = ExtResource("2_curve")
+
+[node name="CurveText" type="TextEdit" parent="RootScroll/RootMargin/VBox/MainSplit/LeftBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 64)
+size_flags_vertical = 3
+editable = false
+
+[node name="RightBox" type="VBoxContainer" parent="RootScroll/RootMargin/VBox/MainSplit"]
+layout_mode = 2
+
+[node name="LogTitle" type="Label" parent="RootScroll/RootMargin/VBox/MainSplit/RightBox"]
+layout_mode = 2
+text = "战斗日志 / 技能释放提示"
+
+[node name="LogText" type="TextEdit" parent="RootScroll/RootMargin/VBox/MainSplit/RightBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 320)
+size_flags_vertical = 3
+editable = false
+
+[connection signal="pressed" from="RootScroll/RootMargin/VBox/Controls/RunButton" to="." method="_on_run_button_pressed"]
+[connection signal="pressed" from="RootScroll/RootMargin/VBox/Controls/BatchButton" to="." method="_on_batch_button_pressed"]
+[connection signal="pressed" from="RootScroll/RootMargin/VBox/Controls/CompareButton" to="." method="_on_compare_button_pressed"]
+[connection signal="pressed" from="RootScroll/RootMargin/VBox/Controls/ExportButton" to="." method="_on_export_button_pressed"]
+[connection signal="pressed" from="RootScroll/RootMargin/VBox/Controls/ReplayButton" to="." method="_on_replay_button_pressed"]
+[connection signal="pressed" from="RootScroll/RootMargin/VBox/Controls/ReloadButton" to="." method="_on_reload_button_pressed"]
+[connection signal="pressed" from="RootScroll/RootMargin/VBox/Controls/BackMenuButton" to="." method="_on_back_menu_button_pressed"]

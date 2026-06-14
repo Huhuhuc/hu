@@ -1,0 +1,70 @@
+[gd_scene format=3 uid="uid://bk0yqv87xkie4"]
+
+[ext_resource type="Script" path="res://scripts/launch_menu.gd" id="1_menu"]
+
+[node name="LaunchMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_menu")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.07, 0.08, 0.09, 1)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MenuBox" type="VBoxContainer" parent="Center"]
+layout_mode = 2
+custom_minimum_size = Vector2(520, 300)
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="Center/MenuBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "余烬回廊"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="Center/MenuBox"]
+layout_mode = 2
+text = "选择体验入口"
+horizontal_alignment = 1
+
+[node name="PlayButton" type="Button" parent="Center/MenuBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 64)
+theme_override_font_sizes/font_size = 20
+text = "可玩房间模式"
+
+[node name="PlayHint" type="Label" parent="Center/MenuBox"]
+layout_mode = 2
+text = "实时动作战斗、房间推进、清房道具三选一"
+horizontal_alignment = 1
+
+[node name="SimulatorButton" type="Button" parent="Center/MenuBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 64)
+theme_override_font_sizes/font_size = 20
+text = "流派模拟器面板"
+
+[node name="SimulatorHint" type="Label" parent="Center/MenuBox"]
+layout_mode = 2
+text = "使用原 Main 页面：回合制 / Tick 模拟、批量统计、JSON/CSV 导出"
+horizontal_alignment = 1
+
+[connection signal="pressed" from="Center/MenuBox/PlayButton" to="." method="_on_play_button_pressed"]
+[connection signal="pressed" from="Center/MenuBox/SimulatorButton" to="." method="_on_simulator_button_pressed"]

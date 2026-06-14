@@ -1,0 +1,617 @@
+{
+  "schema_version": "1.0.0",
+  "game": {
+    "tick_seconds": 0.1,
+    "max_turns": 80,
+    "max_seconds": 120,
+    "starting_energy": 3,
+    "max_energy": 6,
+    "room_clear_heal": 48,
+    "starting_stat_points": 6,
+    "item_slots": 2,
+    "reward_affix_chance": 0.85
+  },
+  "characters": [
+    {
+      "id": "ember_hunter",
+      "name": "余烬猎手",
+      "base_stats": {
+        "max_hp": 120,
+        "attack": 12,
+        "defense": 3,
+        "crit_rate": 0.1,
+        "crit_damage": 1.8,
+        "speed": 10,
+        "burn_power": 4,
+        "summon_power": 6,
+        "energy_regen": 1
+      },
+      "stat_growth": {
+        "attack": 2,
+        "crit_rate": 0.05,
+        "speed": 1.5,
+        "max_hp": 10,
+        "burn_power": 1.5,
+        "summon_power": 2,
+        "defense": 1
+      },
+      "skill_ids": [
+        "basic_attack",
+        "core_split",
+        "ember_mark",
+        "armor_pulse",
+        "ember_servant"
+      ]
+    }
+  ],
+  "skills": [
+    {
+      "id": "basic_attack",
+      "name": "余烬短击",
+      "kind": "basic",
+      "cooldown": 0,
+      "energy_cost": 0,
+      "power": 1.0,
+      "can_crit": true,
+      "tags": ["physical"],
+      "effects": []
+    },
+    {
+      "id": "core_split",
+      "name": "裂芯斩",
+      "kind": "direct_damage",
+      "cooldown": 3,
+      "energy_cost": 2,
+      "power": 2.2,
+      "can_crit": true,
+      "tags": ["physical", "burst", "crit"],
+      "effects": [
+        {
+          "type": "bonus_vs_debuff",
+          "debuff": "armor_break",
+          "damage_multiplier": 1.25
+        }
+      ]
+    },
+    {
+      "id": "ember_mark",
+      "name": "燃烬印记",
+      "kind": "dot",
+      "cooldown": 4,
+      "energy_cost": 2,
+      "power": 0.8,
+      "can_crit": false,
+      "tags": ["fire", "burn", "sustain"],
+      "effects": [
+        {
+          "type": "burn",
+          "stacks": 4,
+          "duration": 4
+        }
+      ]
+    },
+    {
+      "id": "armor_pulse",
+      "name": "碎甲脉冲",
+      "kind": "debuff",
+      "cooldown": 5,
+      "energy_cost": 3,
+      "power": 1.0,
+      "can_crit": false,
+      "tags": ["physical", "debuff"],
+      "effects": [
+        {
+          "type": "armor_break",
+          "stacks": 2,
+          "duration": 3,
+          "damage_taken_multiplier_per_stack": 0.12
+        }
+      ]
+    },
+    {
+      "id": "ember_servant",
+      "name": "余烬仆从",
+      "kind": "summon",
+      "cooldown": 6,
+      "energy_cost": 3,
+      "power": 1.0,
+      "can_crit": false,
+      "tags": ["summon", "fire"],
+      "effects": [
+        {
+          "type": "summon",
+          "unit_id": "ember_servant_unit",
+          "duration_turns": 5,
+          "duration_seconds": 8,
+          "base_limit": 2,
+          "attack_stat": "summon_power"
+        }
+      ]
+    }
+  ],
+  "items": [
+    {
+      "id": "prism_charm",
+      "name": "棱镜护符",
+      "effects": [
+        {
+          "type": "stat_add",
+          "stat": "crit_rate",
+          "value": 0.1
+        }
+      ],
+      "tags": ["crit"]
+    },
+    {
+      "id": "blade_gear",
+      "name": "锋刃齿轮",
+      "effects": [
+        {
+          "type": "on_crit_damage",
+          "scale_stat": "attack",
+          "scale": 0.6
+        }
+      ],
+      "tags": ["crit", "burst"]
+    },
+    {
+      "id": "ember_hourglass",
+      "name": "余火沙漏",
+      "effects": [
+        {
+          "type": "burn_modify",
+          "extra_duration": 1,
+          "damage_multiplier": 1.15
+        }
+      ],
+      "tags": ["burn", "sustain"]
+    },
+    {
+      "id": "fission_spark",
+      "name": "裂变火种",
+      "effects": [
+        {
+          "type": "burn_explosion",
+          "required_stacks": 4,
+          "scale_stat": "burn_power",
+          "scale": 3.0,
+          "internal_cooldown": 3
+        }
+      ],
+      "tags": ["burn", "explosion"]
+    },
+    {
+      "id": "ash_bell",
+      "name": "灰烬铃",
+      "effects": [
+        {
+          "type": "summon_limit_add",
+          "value": 1
+        }
+      ],
+      "tags": ["summon"]
+    },
+    {
+      "id": "resonance_core",
+      "name": "共鸣核心",
+      "effects": [
+        {
+          "type": "on_summon_damage_energy",
+          "energy": 0.3
+        }
+      ],
+      "tags": ["summon", "energy"]
+    },
+    {
+      "id": "blood_lens",
+      "name": "血色透镜",
+      "effects": [
+        {
+          "type": "stat_add",
+          "stat": "attack",
+          "value": 4
+        },
+        {
+          "type": "stat_add",
+          "stat": "crit_rate",
+          "value": 0.08
+        }
+      ],
+      "tags": ["crit", "attack"]
+    },
+    {
+      "id": "iron_heart",
+      "name": "铁心脏",
+      "effects": [
+        {
+          "type": "stat_add",
+          "stat": "max_hp",
+          "value": 25
+        },
+        {
+          "type": "stat_add",
+          "stat": "defense",
+          "value": 1
+        }
+      ],
+      "tags": ["survival"]
+    },
+    {
+      "id": "swift_boots",
+      "name": "疾行靴",
+      "effects": [
+        {
+          "type": "stat_add",
+          "stat": "speed",
+          "value": 3
+        }
+      ],
+      "tags": ["speed"]
+    },
+    {
+      "id": "hot_coal",
+      "name": "热煤块",
+      "effects": [
+        {
+          "type": "stat_add",
+          "stat": "burn_power",
+          "value": 3
+        }
+      ],
+      "tags": ["burn"]
+    },
+    {
+      "id": "little_furnace",
+      "name": "小熔炉",
+      "effects": [
+        {
+          "type": "stat_add",
+          "stat": "summon_power",
+          "value": 4
+        }
+      ],
+      "tags": ["summon"]
+    },
+    {
+      "id": "battery_flask",
+      "name": "电池瓶",
+      "effects": [
+        {
+          "type": "stat_add",
+          "stat": "energy_regen",
+          "value": 0.7
+        }
+      ],
+      "tags": ["energy"]
+    },
+    {
+      "id": "ember_vial",
+      "name": "余烬急救瓶",
+      "charges": 1,
+      "effects": [
+        {
+          "type": "active_heal",
+          "value": 34,
+          "max_hp_ratio": 0.08
+        }
+      ],
+      "tags": ["active", "survival"]
+    }
+  ],
+  "item_affixes": [
+    {
+      "id": "sharp",
+      "display_name": "锋锐",
+      "name_prefix": "锋锐的",
+      "name_suffix": "",
+      "description": "追加攻击力，适合暴击与爆发道具。",
+      "weight": 2,
+      "applicable_tags": ["crit", "attack", "burst"],
+      "effects": [
+        {
+          "type": "stat_add",
+          "stat": "attack",
+          "value": 2
+        }
+      ],
+      "tags": ["affix_attack"]
+    },
+    {
+      "id": "embered",
+      "display_name": "炽燃",
+      "name_prefix": "炽燃的",
+      "name_suffix": "",
+      "description": "追加灼烧强度，适合持续伤害道具。",
+      "weight": 2,
+      "applicable_tags": ["burn", "sustain", "explosion"],
+      "effects": [
+        {
+          "type": "stat_add",
+          "stat": "burn_power",
+          "value": 2
+        }
+      ],
+      "tags": ["affix_burn"]
+    },
+    {
+      "id": "echoing",
+      "display_name": "回响",
+      "name_prefix": "回响的",
+      "name_suffix": "",
+      "description": "追加召唤强度与少量能量恢复，适合召唤循环。",
+      "weight": 2,
+      "applicable_tags": ["summon", "energy"],
+      "effects": [
+        {
+          "type": "stat_add",
+          "stat": "summon_power",
+          "value": 2
+        },
+        {
+          "type": "stat_add",
+          "stat": "energy_regen",
+          "value": 0.2
+        }
+      ],
+      "tags": ["affix_summon"]
+    },
+    {
+      "id": "steady",
+      "display_name": "稳固",
+      "name_prefix": "稳固的",
+      "name_suffix": "",
+      "description": "追加生命值与防御，适合容错和主动道具。",
+      "weight": 1.4,
+      "applicable_tags": ["survival", "active"],
+      "effects": [
+        {
+          "type": "stat_add",
+          "stat": "max_hp",
+          "value": 12
+        },
+        {
+          "type": "stat_add",
+          "stat": "defense",
+          "value": 1
+        }
+      ],
+      "tags": ["affix_survival"]
+    },
+    {
+      "id": "swift",
+      "display_name": "迅捷",
+      "name_prefix": "迅捷的",
+      "name_suffix": "",
+      "description": "追加速度，适合需要更快行动频率的构筑。",
+      "weight": 1.6,
+      "applicable_tags": ["speed", "energy", "active"],
+      "effects": [
+        {
+          "type": "stat_add",
+          "stat": "speed",
+          "value": 1.5
+        }
+      ],
+      "tags": ["affix_speed"]
+    }
+  ],
+  "monsters": [
+    {
+      "id": "ash_crawler",
+      "name": "灰壳爬行者",
+      "stats": {
+        "max_hp": 55,
+        "attack": 8,
+        "defense": 1,
+        "speed": 8
+      },
+      "behavior": {
+        "type": "basic_attack"
+      }
+    },
+    {
+      "id": "spark_bat",
+      "name": "火花蝠",
+      "stats": {
+        "max_hp": 35,
+        "attack": 6,
+        "defense": 0,
+        "speed": 14
+      },
+      "behavior": {
+        "type": "fast_chaser"
+      }
+    },
+    {
+      "id": "bone_turret",
+      "name": "骨火炮台",
+      "stats": {
+        "max_hp": 70,
+        "attack": 10,
+        "defense": 2,
+        "speed": 0
+      },
+      "behavior": {
+        "type": "stationary_shooter"
+      }
+    },
+    {
+      "id": "tar_slime",
+      "name": "焦油史莱姆",
+      "stats": {
+        "max_hp": 85,
+        "attack": 11,
+        "defense": 2,
+        "speed": 5
+      },
+      "behavior": {
+        "type": "slow_brute"
+      }
+    },
+    {
+      "id": "ember_mage",
+      "name": "余烬法师",
+      "stats": {
+        "max_hp": 95,
+        "attack": 13,
+        "defense": 1,
+        "speed": 7
+      },
+      "behavior": {
+        "type": "caster"
+      }
+    },
+    {
+      "id": "furnace_guard",
+      "name": "炉心守卫",
+      "stats": {
+        "max_hp": 150,
+        "attack": 14,
+        "defense": 4,
+        "speed": 6
+      },
+      "behavior": {
+        "type": "basic_attack_with_guard",
+        "guard_every_actions": 3,
+        "guard_damage_reduction": 0.3,
+        "guard_applies_to": "direct_damage"
+      }
+    }
+  ],
+  "stages": [
+    {
+      "id": "corridor_entrance",
+      "name": "回廊入口",
+      "waves": [
+        {
+          "monster_id": "ash_crawler",
+          "count": 3,
+          "spawn": "sequential"
+        },
+        {
+          "monster_id": "spark_bat",
+          "count": 2,
+          "spawn": "sequential"
+        }
+      ]
+    },
+    {
+      "id": "ash_cellar",
+      "name": "灰烬地窖",
+      "waves": [
+        {
+          "monster_id": "tar_slime",
+          "count": 2,
+          "spawn": "sequential"
+        },
+        {
+          "monster_id": "bone_turret",
+          "count": 1,
+          "spawn": "sequential"
+        }
+      ]
+    },
+    {
+      "id": "ember_library",
+      "name": "余烬书库",
+      "waves": [
+        {
+          "monster_id": "ember_mage",
+          "count": 2,
+          "spawn": "sequential"
+        },
+        {
+          "monster_id": "spark_bat",
+          "count": 3,
+          "spawn": "sequential"
+        }
+      ]
+    },
+    {
+      "id": "cracked_vault",
+      "name": "裂隙宝库",
+      "waves": [
+        {
+          "monster_id": "bone_turret",
+          "count": 2,
+          "spawn": "sequential"
+        },
+        {
+          "monster_id": "tar_slime",
+          "count": 2,
+          "spawn": "sequential"
+        }
+      ]
+    },
+    {
+      "id": "bat_nest",
+      "name": "火花巢穴",
+      "waves": [
+        {
+          "monster_id": "spark_bat",
+          "count": 5,
+          "spawn": "sequential"
+        },
+        {
+          "monster_id": "ember_mage",
+          "count": 1,
+          "spawn": "sequential"
+        }
+      ]
+    },
+    {
+      "id": "furnace_core",
+      "name": "炉心大厅",
+      "waves": [
+        {
+          "monster_id": "ash_crawler",
+          "count": 2,
+          "spawn": "sequential"
+        },
+        {
+          "monster_id": "furnace_guard",
+          "count": 1,
+          "spawn": "sequential"
+        }
+      ]
+    }
+  ],
+  "build_presets": [
+    {
+      "id": "crit_build",
+      "name": "裂芯暴击流",
+      "stat_points": {
+        "attack": 3,
+        "crit_rate": 3
+      },
+      "item_ids": ["prism_charm", "blade_gear"],
+      "strategy_id": "crit_strategy",
+      "core_skill_ids": ["armor_pulse", "core_split"],
+      "synergy": "碎甲脉冲制造增伤窗口，裂芯斩吃暴击与锋刃齿轮追加伤害。"
+    },
+    {
+      "id": "burn_build",
+      "name": "余火持续输出流",
+      "stat_points": {
+        "speed": 3,
+        "burn_power": 3
+      },
+      "item_ids": ["ember_hourglass", "fission_spark"],
+      "strategy_id": "burn_strategy",
+      "core_skill_ids": ["ember_mark"],
+      "synergy": "燃烬印记尽早叠 4 层灼烧，余火沙漏延长持续时间，裂变火种把 DOT 转成周期爆发。"
+    },
+    {
+      "id": "summon_build",
+      "name": "余烬召唤流",
+      "stat_points": {
+        "summon_power": 4,
+        "max_hp": 2
+      },
+      "item_ids": ["ash_bell", "resonance_core"],
+      "strategy_id": "summon_strategy",
+      "core_skill_ids": ["ember_servant"],
+      "synergy": "余烬仆从越早释放收益越高，灰烬铃提高铺场上限，共鸣核心让召唤攻击反哺能量循环。"
+    }
+  ]
+}
