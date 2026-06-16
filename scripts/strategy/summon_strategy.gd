@@ -1,6 +1,9 @@
 class_name SummonStrategy
 extends "res://scripts/strategy/strategy_base.gd"
 
+# 铺场策略：优先填满召唤位，
+# 再让召唤物、回能和直伤技能形成更安全的长线循环。
+
 func get_strategy_id() -> String:
 	return "summon_strategy"
 
@@ -31,11 +34,13 @@ func decide_action(context: Dictionary) -> Dictionary:
 	if enemies.is_empty():
 		return {"type": "wait"}
 	var player: Dictionary = context.get("player", {})
+	# 召唤流定位是稳，所以扩展输出前先保证血量安全。
 	if float(player.get("hp", 0.0)) < float(player.get("max_hp", 1.0)) * 0.40 and _can_use_item(context, "ember_vial"):
 		return {"type": "use_item", "item_id": "ember_vial", "target_id": target_id}
 	var summons: Array = player.get("summons", [])
 	var summon_limit = int(player.get("summon_limit", 2))
 	var target: Dictionary = enemies[0]
+	# 先补满缺失的召唤位，再把行动花在直接伤害上。
 	if _can_cast(context, "ember_servant") and summons.size() < summon_limit:
 		return {"type": "cast_skill", "skill_id": "ember_servant", "target_id": target_id}
 	if _can_cast(context, "ember_mark") and float(target.get("hp", 0.0)) > float(target.get("max_hp", 1.0)) * 0.5:

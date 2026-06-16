@@ -6,6 +6,8 @@ var caption = "暂无伤害曲线"
 
 
 func set_curve(curve: Array, text: String = "累计伤害曲线") -> void:
+	# 外部传入的是模拟器导出的普通字典数组。
+	# 这里复制一份，避免 UI 绘制过程中反向修改结果数据。
 	points = curve.duplicate(true)
 	caption = text
 	queue_redraw()
@@ -18,6 +20,8 @@ func clear_curve(text: String = "暂无伤害曲线") -> void:
 
 
 func _draw() -> void:
+	# Control 的绘制入口。Godot 会在 queue_redraw() 后调用这里，
+	# 所以曲线刷新不需要额外创建或销毁节点。
 	var rect = Rect2(Vector2.ZERO, size)
 	draw_rect(rect, Color(0.12, 0.13, 0.14), true)
 	draw_rect(rect, Color(0.30, 0.31, 0.32), false, 1.0)
@@ -34,6 +38,7 @@ func _draw() -> void:
 	var max_total = 0.0
 	var max_delta = 0.0
 	for point in points:
+		# 兼容单场、批量和旧字段名，避免导出结构小调整后图表直接空白。
 		max_time = max(max_time, float(point.get("time", 0.0)))
 		max_total = max(max_total, float(point.get("damage", point.get("total_damage", 0.0))))
 		max_delta = max(max_delta, float(point.get("delta", point.get("damage_delta", point.get("damage", 0.0)))))
@@ -44,6 +49,7 @@ func _draw() -> void:
 	_draw_legend(font, plot)
 	var total_color = Color(1.0, 0.58, 0.18)
 	var delta_color = Color(0.20, 0.72, 0.90, 0.45)
+	# 蓝色竖线表示每个事件造成的单次伤害，橙色折线表示累计伤害。
 	for point in points:
 		var point_x = _time_to_x(point, plot, max_time)
 		var delta_value = float(point.get("delta", point.get("damage_delta", 0.0)))
@@ -64,6 +70,7 @@ func _draw() -> void:
 
 
 func _draw_grid(plot: Rect2) -> void:
+	# 固定五等分网格，保证小尺寸面板也能快速读出趋势。
 	for i in range(5):
 		var t = float(i) / 4.0
 		var y = plot.position.y + plot.size.y * t

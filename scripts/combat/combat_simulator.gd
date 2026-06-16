@@ -1,6 +1,9 @@
 class_name CombatSimulator
 extends RefCounted
 
+# 这是战斗规则引擎。
+# 它只负责“战斗怎么结算”，不负责判断“哪套构筑更聪明”。
+# 构筑和行动选择都交给策略接口处理。
 var config: Dictionary
 var strategy
 var mode = "turn_based"
@@ -28,6 +31,8 @@ var run_seed = 0
 
 
 func setup(p_config: Dictionary, p_strategy: Object, p_mode: String, seed_value: int) -> void:
+	# 同一个模拟器实例可以反复用于测试。
+	# 每次开始前都要清空上一局状态，并按编号建立索引，方便战斗中快速查数据。
 	config = p_config
 	strategy = p_strategy
 	mode = p_mode
@@ -52,6 +57,9 @@ func setup(p_config: Dictionary, p_strategy: Object, p_mode: String, seed_value:
 
 
 func run() -> Dictionary:
+	# 跑完整的一次通关尝试。
+	# 初始构筑优先由策略决定；如果策略返回了非法构筑，
+	# 就回退到配置里的对应预设，保证模拟还能继续。
 	var characters: Array = config.get("characters", [])
 	var stages: Array = config.get("stages", [])
 	if characters.is_empty() or stages.is_empty():
@@ -61,6 +69,8 @@ func run() -> Dictionary:
 	var preset = _find_build_preset(strategy.get_strategy_id())
 	var requested_build: Dictionary = {}
 	if strategy.has_method("choose_initial_build"):
+		# 传给策略的上下文故意保持为普通数据。
+		# 以后即使把策略换成外部程序或网络服务，也不需要重写战斗核心。
 		requested_build = strategy.choose_initial_build({
 		"schema_version": config.get("schema_version", "unknown"),
 		"mode": mode,
@@ -122,6 +132,8 @@ func _start_stage(stage: Dictionary, index: int) -> void:
 
 
 func _run_turn_based() -> void:
+	# 回合制最容易讲清楚：每轮循环就是一次决策窗口，
+	# 然后技能冷却和状态持续时间推进一回合。
 	var max_turns = int(config.get("game", {}).get("max_turns", 80))
 	var start_turn = turn
 	while _battle_continues() and turn - start_turn < max_turns:
@@ -149,6 +161,8 @@ func _run_turn_based() -> void:
 
 
 func _run_realtime() -> void:
+	# 实时推进模式复用同一套动作和伤害代码，只是按固定时间片推进。
+	# 这样速度、冷却、灼烧、召唤物和敌人攻击都能按真实时间比较。
 	var game: Dictionary = config.get("game", {})
 	var tick_seconds = float(game.get("tick_seconds", 0.1))
 	var max_seconds = float(game.get("max_seconds", 120.0))
@@ -186,6 +200,8 @@ func _run_realtime() -> void:
 
 
 func _make_player(character: Dictionary, build: Dictionary) -> Dictionary:
+	# 把静态配置和选中的构筑转换成运行时状态：
+	# 最终属性、道具效果、主动道具次数、技能冷却、召唤物、生命值和能量。
 	var stats: Dictionary = character.get("base_stats", {}).duplicate(true)
 	var growth: Dictionary = character.get("stat_growth", {})
 	for stat_name in build.get("stat_points", {}).keys():
@@ -280,6 +296,9 @@ func _spawn_next_enemy_if_needed() -> void:
 
 
 func _claim_room_reward(stage_index: int, stage: Dictionary) -> void:
+	# 清房奖励也是策略决策点。
+	# 模拟器只提供合法选项，策略负责选择；
+	# 如果策略乱选，就回退到安全选项并记录警告。
 	var choices = _roll_reward_choices(3)
 	if choices.is_empty():
 		_log("房间奖励：无可选道具。")
@@ -390,6 +409,8 @@ func _apply_item_to_player(item_source: Variant) -> void:
 
 
 func _player_action() -> void:
+	# 战斗核心不会自己选择某个流派专属动作。
+	# 它只负责构造战斗上下文、询问策略、校正非法答案，然后执行动作。
 	player["energy"] = min(float(player["max_energy"]), float(player["energy"]) + float(player["stats"].get("energy_regen", 0.0)))
 	var context = _make_context()
 	var action = _sanitize_action(strategy.decide_action(context), context)
@@ -555,6 +576,9 @@ func _monster_action() -> void:
 
 
 func _deal_damage(enemy: Dictionary, amount: float, direct: bool, can_crit: bool, source: String) -> void:
+	# 所有伤害来源都汇总到这里。
+	# 这样表格、回放和图表的统计口径一致；
+	# 不管伤害来自技能、道具、灼烧结算还是召唤物。
 	if enemy.is_empty() or float(enemy.get("hp", 0.0)) <= 0.0:
 		return
 	var hp_before = float(enemy.get("hp", 0.0))
@@ -645,6 +669,8 @@ func _tick_summon_duration(step: float) -> void:
 
 
 func _make_context() -> Dictionary:
+	# 这是给策略接口的公开战斗上下文。
+	# 字段保持明确、数据保持简单，方便未来把策略放到脚本、外部进程或网络服务里运行。
 	var enemies: Array = []
 	if _current_enemy_alive():
 		enemies.append({
@@ -686,6 +712,9 @@ func _available_actions() -> Array:
 
 
 func _sanitize_action(action: Dictionary, context: Dictionary) -> Dictionary:
+	# 策略可以不完美。
+	# 非法动作会被记录为警告，然后回退到安全合法动作，
+	# 而不是让整场模拟直接中断。
 	for available in context.get("available_actions", []):
 		if available.get("type", "") == action.get("type", ""):
 			if action.get("type", "") == "cast_skill" and available.get("skill_id", "") != action.get("skill_id", ""):
@@ -709,6 +738,8 @@ func _current_enemy_alive() -> bool:
 
 
 func _make_result() -> Dictionary:
+	# 返回的不只是胜负结果，也包括调试证据。
+	# 说明文档里的设计自评就是靠这些数据支撑，而不是只靠直觉。
 	var victory = float(player.get("hp", 0.0)) > 0.0 and not _current_enemy_alive() and enemy_queue.is_empty()
 	_record_event("battle_end", {
 		"victory": victory,
@@ -823,6 +854,8 @@ func _make_reward_option(base_item: Dictionary) -> Dictionary:
 
 
 func _make_item_runtime(base_item: Dictionary, affix: Dictionary = {}) -> Dictionary:
+	# 道具词缀会合并进运行时副本。
+	# 核心战斗只读取最终效果列表，所以新增奖励变体大多只需要改配置。
 	if base_item.is_empty():
 		return {}
 	var base_name = String(base_item.get("name", base_item.get("id", "")))

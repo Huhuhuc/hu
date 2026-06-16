@@ -1,5 +1,8 @@
 extends Control
 
+# 这是可手动体验的演示场景。
+# 它复用同一套配置数据，重点展示可见移动、子弹、技能、奖励和结果导出。
+# 批量验证和策略解耦则由模拟器面板负责。
 const CONFIG_PATH = "res://data/sample_config.json"
 const RESULT_JSON = "user://play_result.json"
 const RESULT_CSV = "user://play_result.csv"
@@ -71,6 +74,8 @@ var summon_energy_gain = 0.0
 
 
 func _ready() -> void:
+	# 先加载数据，再决定是自动启动冒烟测试，还是显示构筑选择。
+	# 等一帧是为了确保场景节点已经准备好，可以安全更新界面。
 	_load_config()
 	await get_tree().process_frame
 	if room_state != "error":
@@ -81,6 +86,9 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	# 可玩模式是轻量动作循环：
+	# 房间进行中时，每帧推进计时器、玩家输入、弹幕、敌人、
+	# 召唤物、状态效果和界面刷新。
 	if room_state == "error":
 		return
 	if room_state == "playing":
@@ -98,6 +106,8 @@ func _process(delta: float) -> void:
 
 
 func _load_config() -> void:
+	# 可玩模式也保持数据驱动。配置缺失时明确报错，
+	# 避免静默生成一个空房间。
 	monsters_by_id.clear()
 	items_by_id.clear()
 	var file = FileAccess.open(CONFIG_PATH, FileAccess.READ)
@@ -141,6 +151,8 @@ func _show_build_select() -> void:
 
 
 func _start_game(start_build: String) -> void:
+	# 进入第一个关卡前，把选中的构筑预设转换成玩家运行时属性、
+	# 道具、生命值和能量。
 	var character = config.get("characters", [])[0]
 	player_stats = character.get("base_stats", {}).duplicate(true)
 	_reset_build_modifiers()
@@ -195,6 +207,8 @@ func _reset_build_modifiers() -> void:
 
 
 func _apply_build(build_id: String) -> void:
+	# 可玩模式使用的也是模拟器同一套构筑预设，
+	# 这样演示内容和验证数据不会脱节。
 	selected_build = build_id
 	var preset = _get_build_preset(build_id)
 	var growth = config.get("characters", [])[0].get("stat_growth", {})
@@ -219,6 +233,8 @@ func _get_build_preset(build_id: String) -> Dictionary:
 
 
 func _apply_item(item_id: String) -> void:
+	# 道具按效果列表生效，和模拟器的数据模型保持一致。
+	# 新道具行为主要可以继续放在配置文件里扩展。
 	var item = items_by_id.get(item_id, {})
 	for effect in item.get("effects", []):
 		match effect.get("type", ""):
@@ -250,6 +266,8 @@ func _refresh_player_derived_stats(heal_amount: float = 0.0) -> void:
 
 
 func _start_stage(stage_index: int) -> void:
+	# 关卡本质是配置出来的怪物波次队列。
+	# 动作场景只负责把这些数据展开成可见敌人。
 	if stage_index >= config.get("stages", []).size():
 		_win_game()
 		return
@@ -284,6 +302,7 @@ func _spawn_next_wave() -> void:
 
 
 func _spawn_enemy(monster_id: String) -> void:
+	# 每个怪物同时保存配置里的属性/行为，以及动作演示需要的界面节点。
 	var monster = monsters_by_id.get(monster_id, {})
 	var stats = monster.get("stats", {})
 	var node = ColorRect.new()
@@ -444,6 +463,8 @@ func _handle_player(delta: float) -> void:
 
 
 func _fire_bullet(big: bool) -> void:
+	# 玩家子弹故意用简单矩形表示；目标是让战斗行为可见，
+	# 不是搭建完整美术管线。
 	var dir = _aim_direction()
 	var node = ColorRect.new()
 	node.size = Vector2(18, 18) if big else Vector2(10, 10)
@@ -596,6 +617,8 @@ func _move_enemy(enemy: Dictionary, to_player: Vector2, behavior: String, delta:
 
 
 func _fire_enemy_projectile(enemy: Dictionary, dir: Vector2, speed: float, color: Color, size: Vector2, label: String) -> void:
+	# 远程敌人的行为会变成可见弹幕，
+	# 这样怪物差异可以在游戏里直接观察，而不是只看日志推断。
 	if dir.length() <= 0.01:
 		return
 	var node = ColorRect.new()
@@ -705,6 +728,8 @@ func _take_damage(amount: float) -> void:
 
 
 func _check_wave_clear() -> void:
+	# 清完一波后，要么进入下一波，要么给清房奖励，要么结束本局。
+	# 这就是可玩模式里对应模拟器“房间循环”的部分。
 	if room_state != "playing":
 		return
 	if enemies.is_empty():
@@ -884,6 +909,8 @@ func _on_back_menu_button_pressed() -> void:
 
 
 func _export_result(victory: bool) -> void:
+	# 可玩模式导出比模拟器轻量，但仍保留复盘字段：
+	# 胜负、耗时、生命值、伤害、道具和曲线数据。
 	var file = FileAccess.open(RESULT_JSON, FileAccess.WRITE)
 	if file == null:
 		return
@@ -908,6 +935,7 @@ func _export_result(victory: bool) -> void:
 
 
 func _export_result_csv(result: Dictionary) -> void:
+	# 表格导出让手动演示也能被复盘，格式和模拟器输出一样方便查看。
 	var file = FileAccess.open(RESULT_CSV, FileAccess.WRITE)
 	if file == null:
 		return

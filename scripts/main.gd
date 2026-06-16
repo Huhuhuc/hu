@@ -1,5 +1,8 @@
-﻿extends Control
+extends Control
 
+# 这是模拟器面板的总入口：
+# 负责读取和校验配置、选择流派策略、启动战斗模拟、显示结果、导出复盘文件。
+# 战斗怎么结算交给战斗模拟器，玩家怎么决策交给策略脚本。
 const CONFIG_PATH = "res://data/sample_config.json"
 const EXPORT_JSON = "user://last_result.json"
 const EXPORT_RESULT_CSV = "user://last_result.csv"
@@ -75,6 +78,8 @@ func _setup_options() -> void:
 
 
 func _load_config() -> void:
+	# 配置文件是策划数据和程序之间的契约。
+	# 这里严格读取和解析，是为了让错误配置在进入模拟器前就暴露出来。
 	var file = FileAccess.open(CONFIG_PATH, FileAccess.READ)
 	if file == null:
 		_show_error("配置加载失败：" + CONFIG_PATH + "；" + error_string(FileAccess.get_open_error()))
@@ -96,6 +101,9 @@ func _load_config() -> void:
 
 
 func _validate_config(data: Dictionary) -> String:
+	# 配置校验用来保护扩展点。
+	# 以后如果新增技能、道具、怪物或构筑预设，只要引用关系或数值不合法，
+	# 就会在这里给出明确错误，而不是带着脏数据进入战斗。
 	for key in ["schema_version", "game", "characters", "skills", "items", "monsters", "stages", "build_presets"]:
 		if not data.has(key):
 			return "缺少顶层字段 " + key
@@ -318,6 +326,8 @@ func _on_compare_button_pressed() -> void:
 
 
 func _run_batch(runs: int, base_seed: int) -> Dictionary:
+	# 批量模式用来验证设计假设。
+	# 同一套策略连续跑多次，统计胜率和平均表现，再导出结果供复盘。
 	var batch = _run_batch_for_strategy(selected_strategy_id, selected_mode, runs, base_seed)
 	var results: Array[Dictionary] = batch.get("results", [])
 	var summary: Dictionary = batch.get("summary", {})
@@ -336,6 +346,8 @@ func _run_batch(runs: int, base_seed: int) -> Dictionary:
 
 
 func _run_batch_for_strategy(strategy_id: String, run_mode: String, runs: int, base_seed: int) -> Dictionary:
+	# 随机种子的步长固定，保证每局既能复现，又不会重复同一组随机结果。
+	# 表格里的任意失败行，都可以按“基础随机种子 + 局数序号”精确重跑。
 	var original_strategy_id = selected_strategy_id
 	var original_mode = selected_mode
 	selected_strategy_id = strategy_id
@@ -353,6 +365,8 @@ func _run_batch_for_strategy(strategy_id: String, run_mode: String, runs: int, b
 
 
 func _run_strategy_compare(runs: int, base_seed: int) -> Dictionary:
+	# 公平对照：每个流派使用同一关卡、同一模式、同一批随机种子。
+	# 这样比较出来的是策略强弱，而不是哪一组随机结果更走运。
 	var started_ms = Time.get_ticks_msec()
 	var compare_summaries: Array[Dictionary] = []
 	var compare_results: Dictionary = {}
@@ -648,6 +662,8 @@ func _event_to_replay_line(event: Dictionary) -> String:
 
 
 func _export_last_result_json() -> String:
+	# 结果文件保留完整复盘证据：
+	# 日志、警告、伤害曲线、回放事件、最终道具和汇总数值都会写进去。
 	last_result["export_meta"] = _make_export_meta("json")
 	var file = FileAccess.open(EXPORT_JSON, FileAccess.WRITE)
 	if file == null:
@@ -666,6 +682,8 @@ func _export_last_result_json() -> String:
 
 
 func _archive_export_copy(source_path: String, extension: String) -> String:
+	# “最新结果”方便界面直接回放。
+	# 归档副本会保存每次实验，避免多轮调参时互相覆盖。
 	var dir = DirAccess.open("user://")
 	if dir == null:
 		return ""
@@ -719,6 +737,8 @@ func _update_selection() -> void:
 
 
 func _handle_command_line() -> void:
+	# 命令行参数让项目不依赖界面点击也能验证。
+	# 这里和面板走同一条模拟器路径，所以冒烟测试和手动运行覆盖的是同一套核心实现。
 	var args = _all_cmdline_args()
 	var base_seed = _seed_from_args(args)
 	if _has_flag(args, "--smoke-turn"):
@@ -832,6 +852,8 @@ func _handle_command_line() -> void:
 
 
 func _all_cmdline_args() -> Array[String]:
+	# 两类参数都要读取：
+	# Godot 自己的启动参数，以及 `--` 后面的项目参数，会进入不同数组。
 	var result: Array[String] = []
 	for arg in OS.get_cmdline_args():
 		result.append(String(arg))
@@ -898,6 +920,9 @@ func _normalize_mode(value: String) -> String:
 
 
 func _run_once(strategy_id: String, run_mode: String, seed_value: int) -> Dictionary:
+	# 单场运行的边界很清楚：
+	# 这里创建选中的策略对象，把它交给战斗模拟器；
+	# 模拟器之后只通过公开的策略接口调用它。
 	if not strategy_scripts.has(strategy_id):
 		return {
 			"strategy_id": strategy_id,
@@ -914,6 +939,8 @@ func _run_once(strategy_id: String, run_mode: String, seed_value: int) -> Dictio
 
 
 func _summarize_batch(results: Array[Dictionary]) -> Dictionary:
+	# 这些统计字段就是设计问题的回答：
+	# 不只看谁赢，还要看通关速度、生存能力、输出、承伤和复盘数据量。
 	var wins = 0
 	var total_time = 0.0
 	var total_turns = 0.0
@@ -1040,6 +1067,8 @@ func _render_batch(summary: Dictionary, results: Array[Dictionary]) -> void:
 
 
 func _render_strategy_compare(summaries: Array[Dictionary], runs: int) -> void:
+	# 图表故意做得很小，直接回答策划问题：
+	# 哪个流派最快、最安全、最稳定？
 	_stop_replay()
 	player_bar.max_value = 1
 	player_bar.value = 0
@@ -1433,9 +1462,3 @@ func _configured_compare_strategy_ids() -> Array[String]:
 	if result.is_empty():
 		result = ["crit_strategy", "burn_strategy", "summon_strategy"]
 	return result
-
-
-
-
-
-

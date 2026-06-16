@@ -1,6 +1,9 @@
 class_name BurnStrategy
 extends "res://scripts/strategy/strategy_base.gd"
 
+# 持续输出策略：保持灼烧层数在线，
+# 依靠持续伤害和更保守的道具选择提升长线稳定性。
+
 func get_strategy_id() -> String:
 	return "burn_strategy"
 
@@ -31,10 +34,12 @@ func decide_action(context: Dictionary) -> Dictionary:
 	if enemies.is_empty():
 		return {"type": "wait"}
 	var player: Dictionary = context.get("player", {})
+	# 灼烧流用时间换稳定，所以比暴击流更早使用回血道具。
 	if float(player.get("hp", 0.0)) < float(player.get("max_hp", 1.0)) * 0.45 and _can_use_item(context, "ember_vial"):
 		return {"type": "use_item", "item_id": "ember_vial", "target_id": target_id}
 	var target: Dictionary = enemies[0]
 	var burn = int(target.get("status", {}).get("burn", 0))
+	# 第一优先级是维持足够灼烧层数，保证持续伤害稳定。
 	if _can_cast(context, "ember_mark") and burn < 4:
 		return {"type": "cast_skill", "skill_id": "ember_mark", "target_id": target_id}
 	if _can_cast(context, "armor_pulse") and float(target.get("hp", 0.0)) > float(target.get("max_hp", 1.0)) * 0.5:
