@@ -249,4 +249,3 @@ C:\Users\Huhuhu\AppData\Roaming\Godot\app_userdata\roge\exports\
 `CombatSimulator` 只负责加载配置、推进规则、结算伤害和导出结果；流派行为全部由 Strategy API 返回。新增职业、流派、AI，甚至外部 Python/LLM 策略时，不需要改核心战斗代码，只需要新增配置里的 `build_presets`、补充策略实现或替换策略调用层。
 
 这让项目不只是一个小战斗 Demo，而是一个可以批量验证 Build 强弱的数值实验工具。
-
